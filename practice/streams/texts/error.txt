@@ -1,0 +1,3 @@
+
+Error: ENOENT: no such file or directory, open '/home/lucas/Documents/backend/streams/texts/nonexistentFile.txt'
+Error: EBADF: bad file descriptor, write
