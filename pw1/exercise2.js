@@ -12,6 +12,14 @@ function verifyUserData(user, password, res) {
   }
 }
 
+function readFiles(file){
+  return fs.readFileSync(file, "utf8")
+}
+
+function filterByData(users, method, key, comparedValue) {
+  return users[method]((user) => user[key] === comparedValue);
+}
+
 function writeFile(users) {
   const formattedData = users
     .map((user) => `${user.id}|${user.user}|${user.password}`)
@@ -32,7 +40,7 @@ function getNextId(users) {
 function parseUsers(data) {
   return data
     .split("\n")
-    .filter((line) => line) 
+    .filter((line) => line)
     .map((line) => {
       const [id, user, password] = line.split("|");
       return { id: parseInt(id), user, password };
@@ -46,14 +54,13 @@ app.get("/user", (req, res) => {
     return res.status(400).send("Please provide an ID in the query string.");
   }
 
-  if (!fs.existsSync(filePath)) {
+  if (existsFile(filePath)) {
     return res.status(404).send("File not found.");
   }
 
-  const data = fs.readFileSync(filePath, "utf8");
+  const data = readFiles(filePath);
   const users = parseUsers(data);
-  const user = users.find((u) => u.id === parseInt(id));
-
+  const user = filterByData(users, "find", "id", parseInt(id));
   if (!user) {
     return res.status(404).send("User not found.");
   }
@@ -67,12 +74,11 @@ app.post("/user", (req, res) => {
   verifyUserData(user, password, res);
 
   let users = [];
-  if (fs.existsSync(filePath)) {
-    const data = fs.readFileSync(filePath, "utf8");
+  if (!existsFile(filePath)) {
+    const data = readFiles(filePath);
     users = parseUsers(data);
   }
-
-  const existingUser = users.find((u) => u.user === user);
+  const existingUser = filterByData(users, "find", "user", user);
   if (existingUser) {
     return res
       .status(400)
@@ -96,9 +102,9 @@ app.put("/user", (req, res) => {
   verifyUserData(user, password, res);
   existsFile(filePath, res);
 
-  const data = fs.readFileSync(filePath, "utf8");
+  const data = readFiles(filePath);
   let users = parseUsers(data);
-  const userIndex = users.findIndex((u) => u.id === parseInt(id));
+  const userIndex = filterByData(users, "findIndex", "id", parseInt(id));
 
   if (userIndex === -1) {
     return res.status(404).send("User not found.");
@@ -118,9 +124,9 @@ app.delete("/user", (req, res) => {
 
   existsFile(filePath, res);
 
-  const data = fs.readFileSync(filePath, "utf8");
+  const data = readFiles(filePath);
   let users = parseUsers(data);
-  const userIndex = users.findIndex((u) => u.id === parseInt(id));
+  const userIndex = filterByData(users, "findIndex", "id", parseInt(id));
 
   if (userIndex === -1) {
     return res.status(404).send("User not found.");
