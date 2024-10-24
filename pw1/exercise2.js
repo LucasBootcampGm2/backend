@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const filePath = path.join(__dirname, "users.json");
+const filePath = path.join(__dirname, "users.txt");
 
 function verifyUserData(user, password, res) {
   if (!user || !password) {
@@ -13,7 +13,10 @@ function verifyUserData(user, password, res) {
 }
 
 function writeFile(users) {
-  return fs.writeFileSync(filePath, JSON.stringify(users, null, 2), "utf8");
+  const formattedData = users
+    .map((user) => `${user.id}|${user.user}|${user.password}`)
+    .join("\n");
+  fs.writeFileSync(filePath, formattedData, "utf8");
 }
 
 function existsFile(file, res) {
@@ -26,6 +29,16 @@ function getNextId(users) {
   return users.length > 0 ? users[users.length - 1].id + 1 : 1;
 }
 
+function parseUsers(data) {
+  return data
+    .split("\n")
+    .filter((line) => line) 
+    .map((line) => {
+      const [id, user, password] = line.split("|");
+      return { id: parseInt(id), user, password };
+    });
+}
+
 app.get("/user", (req, res) => {
   const { id } = req.query;
 
@@ -33,20 +46,19 @@ app.get("/user", (req, res) => {
     return res.status(400).send("Please provide an ID in the query string.");
   }
 
-  fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(404).send("File not found.");
-    }
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("File not found.");
+  }
 
-    const users = JSON.parse(data);
-    const user = users.find((u) => u.id === parseInt(id));
+  const data = fs.readFileSync(filePath, "utf8");
+  const users = parseUsers(data);
+  const user = users.find((u) => u.id === parseInt(id));
 
-    if (!user) {
-      return res.status(404).send("User not found.");
-    }
+  if (!user) {
+    return res.status(404).send("User not found.");
+  }
 
-    return res.status(200).json(user);
-  });
+  return res.status(200).json(user);
 });
 
 app.post("/user", (req, res) => {
@@ -57,7 +69,7 @@ app.post("/user", (req, res) => {
   let users = [];
   if (fs.existsSync(filePath)) {
     const data = fs.readFileSync(filePath, "utf8");
-    users = JSON.parse(data);
+    users = parseUsers(data);
   }
 
   const existingUser = users.find((u) => u.user === user);
@@ -85,7 +97,7 @@ app.put("/user", (req, res) => {
   existsFile(filePath, res);
 
   const data = fs.readFileSync(filePath, "utf8");
-  let users = JSON.parse(data);
+  let users = parseUsers(data);
   const userIndex = users.findIndex((u) => u.id === parseInt(id));
 
   if (userIndex === -1) {
@@ -107,7 +119,7 @@ app.delete("/user", (req, res) => {
   existsFile(filePath, res);
 
   const data = fs.readFileSync(filePath, "utf8");
-  let users = JSON.parse(data);
+  let users = parseUsers(data);
   const userIndex = users.findIndex((u) => u.id === parseInt(id));
 
   if (userIndex === -1) {
