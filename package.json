@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-pw1-e1": "nodemon pw1/exercise1.js",
     "start-pw1-e2": "nodemon pw1/exercise2.js",
-    "start-pw2-e1": "nodemon pw2/exercise1.js"
+    "start-pw2-e1": "nodemon pw2/exercise1.js",
+    "start-tl": "nodemon todoList/server.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +16,8 @@
     "nodemon": "^3.1.7"
   },
   "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
     "express": "^4.21.1"
   }
 }
