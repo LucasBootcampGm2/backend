@@ -7,7 +7,10 @@
     "start-pw1-e1": "nodemon pw1/exercise1.js",
     "start-pw1-e2": "nodemon pw1/exercise2.js",
     "start-pw2-e1": "nodemon pw2/exercise1.js",
-    "start-tl": "nodemon todoList/server.js"
+    "start-tl": "nodemon todoList/server.js",
+    "start-sra": "nodemon simple-rest-api/index.js",
+    "start-mp1": "nodemon middlewares/practice1/server.js",
+    "start-mp2": "nodemon middlewares/practice2/server.js"
   },
   "author": "",
   "license": "ISC",

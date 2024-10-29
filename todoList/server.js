@@ -60,5 +60,5 @@ const port = 3000;
 const host = "localhost";
 
 app.listen(port, () => {
-  console.log(`Server running in http://${host}:${port}`);
+  console.log(`Server running in http://${host}:${port}/api/tasks`);
 });
